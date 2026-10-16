@@ -1,0 +1,156 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>COZY CAT TETRIS - 고양이 테트리스</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Gaegu, Chakra Petch & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700;800&family=Gaegu:wght@700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      color: #f8fafc;
+      touch-action: manipulation;
+      -webkit-user-select: none;
+      user-select: none;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Fixed Background with 01.png */
+    .bg-cat-container {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background-image: url('01.png'), url('01.jpg');
+      background-size: cover;
+      background-position: center 30%;
+      background-repeat: no-repeat;
+      transform: scale(1.02);
+      filter: brightness(0.88) contrast(1.05);
+    }
+
+    /* Ambient Warm Overlay */
+    .bg-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 35%, rgba(15, 23, 42, 0.25) 0%, rgba(8, 10, 18, 0.65) 100%);
+      backdrop-filter: blur(1px);
+    }
+
+    .font-cat {
+      font-family: 'Gaegu', cursive;
+    }
+    .font-arcade {
+      font-family: 'Chakra Petch', sans-serif;
+      letter-spacing: 0.05em;
+    }
+
+    /* Glassmorphism Styles */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.58);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+    }
+
+    .glass-canvas-board {
+      background: rgba(6, 11, 25, 0.45);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      border: 1.5px solid rgba(251, 191, 36, 0.4);
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.2), inset 0 0 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .neon-text-gold {
+      text-shadow: 0 0 10px rgba(251, 191, 36, 0.8), 0 0 20px rgba(245, 158, 11, 0.4);
+    }
+
+    .neon-text-pink {
+      text-shadow: 0 0 10px rgba(244, 114, 182, 0.8), 0 0 20px rgba(244, 63, 94, 0.5);
+    }
+
+    /* Touch Controls */
+    .touch-btn {
+      touch-action: manipulation;
+      transition: all 0.08s ease;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .touch-btn:active {
+      transform: scale(0.92);
+      background: rgba(245, 158, 11, 0.35);
+      border-color: rgba(251, 191, 36, 0.8);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between p-2 sm:p-4">
+
+  <!-- Background Music Audio Tag (02.mp3) -->
+  <audio id="bgmAudio" src="02.mp3" loop preload="auto"></audio>
+
+  <!-- Fixed Cat Background and Ambient Dark Layer -->
+  <div class="bg-cat-container"></div>
+  <div class="bg-overlay"></div>
+
+  <!-- Header Section -->
+  <header class="w-full max-w-4xl flex items-center justify-between py-2 px-3 sm:px-6 rounded-2xl glass-panel mt-1">
+    <div class="flex items-center space-x-2">
+      <span class="text-2xl sm:text-3xl">🐱</span>
+      <div>
+        <h1 class="text-xl sm:text-2xl font-black tracking-wide font-arcade text-amber-300 neon-text-gold flex items-center gap-1.5">
+          COZY CAT TETRIS
+          <span class="text-xs font-cat text-pink-300 font-bold hidden sm:inline">냐옹 테트리스</span>
+        </h1>
+      </div>
+    </div>
+
+    <!-- Controls: Sound, Pause, Restart -->
+    <div class="flex items-center space-x-2">
+      <button id="soundBtn" class="px-3 py-1.5 rounded-xl border border-white/20 bg-slate-900/60 hover:bg-amber-500/20 hover:border-amber-400 transition text-sm flex items-center space-x-1">
+        <span id="soundIcon">🔊</span>
+        <span class="hidden sm:inline text-xs font-semibold text-slate-200">SOUND</span>
+      </button>
+      <button id="pauseBtn" class="px-3 py-1.5 rounded-xl border border-white/20 bg-slate-900/60 hover:bg-yellow-500/20 hover:border-yellow-400 transition text-sm flex items-center space-x-1">
+        <span id="pauseIcon">⏸</span>
+        <span class="hidden sm:inline text-xs font-semibold text-slate-200">PAUSE</span>
+      </button>
+      <button id="restartBtn" class="px-3 py-1.5 rounded-xl border border-white/20 bg-slate-900/60 hover:bg-rose-500/20 hover:border-rose-400 transition text-sm flex items-center space-x-1">
+        <span>🔄</span>
+        <span class="hidden sm:inline text-xs font-semibold text-slate-200">RETRY</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Game Layout -->
+  <main class="w-full max-w-4xl flex flex-col md:flex-row items-center md:items-start justify-center gap-4 my-auto relative pt-2">
+    
+    <!-- LEFT PANEL: Hold Box & Score -->
+    <div class="flex flex-row md:flex-col gap-3 w-full md:w-44 justify-between md:justify-start order-2 md:order-1">
+      <!-- HOLD BOX -->
+      <div class="flex-1 md:flex-none p-3 rounded-2xl glass-panel flex flex-col items-center">
+        <div class="w-full flex justify-between items-center text-xs font-arcade font-bold text-pink-300 mb-1">
+          <span>HOLD 🐾</span>
+          <span class="text-[10px] text-slate-400 hidden sm:inline">[C / SHIFT]</span>
+        </div>
+        <div class="w-24 h-24 flex items-center justify-center bg-black/30 rounded-xl border border-white/10 relative overflow-hidden">
+          <canvas id="holdCanvas" width="96" height="96"></canvas>
+          <div id="holdLockBadge" class="hidden absolute text-[10px] uppercase font-bold text-rose-300 bg-rose-950/80 px-1.5 py-0.5 rounded-full border border-rose-500/50">LOCKED</div>
+        </div>
+      </div>
+
+      <!-- SCORE & HIGH SCORE -->
+      <div class="flex-1 md:flex-none p-3 rounded-2xl glass-panel flex flex-col gap-2">
+        <div>
+          <span class="text-[10px] font-arcade font-bold tracking-wider text-amber-
